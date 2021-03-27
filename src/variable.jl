@@ -1,18 +1,6 @@
 using SymbolicUtils: FnType, Sym
 using Setfield
 
-const IndexMap = Dict{Char,Char}(
-            '0' => '₀',
-            '1' => '₁',
-            '2' => '₂',
-            '3' => '₃',
-            '4' => '₄',
-            '5' => '₅',
-            '6' => '₆',
-            '7' => '₇',
-            '8' => '₈',
-            '9' => '₉')
-
 struct VariableDefaultValue end
 
 """
@@ -47,29 +35,14 @@ struct Variable{T} <: Function # backward compat
     """The variable's unique name."""
     name::Symbol
     Variable(name) = Sym{Real}(name)
+    Variable(name, i, indices...) = Sym{Real}(name, i, indices...)
     Variable{T}(name) where T = Sym{T}(name)
-    function Variable{T}(name, indices...) where T
-        var_name = Symbol("$(name)$(join(map_subscripts.(indices), "ˏ"))")
-        Sym{T}(var_name)
+    function Variable{T}(name, i, indices...) where T
+        Sym{T}(name, i, indices...)
     end
 end
 
-function Variable(name, indices...)
-    var_name = Symbol("$(name)$(join(map_subscripts.(indices), "ˏ"))")
-    Variable(var_name)
-end
-
-# TODO: move this to Symutils
-function Sym{T}(name, i, indices...) where T
-    var_name = Symbol("$(name)$(join(map_subscripts.((i, indices...,)), "ˏ"))")
-    Sym{T}(var_name)
-end
-
-function map_subscripts(indices)
-    str = string(indices)
-    join(IndexMap[c] for c in str)
-end
-
+# Should this be moved to SymbolicUtils?
 rename(x::Sym,name) = @set! x.name = name
 function rename(x::Symbolic, name)
     if operation(x) isa Sym
