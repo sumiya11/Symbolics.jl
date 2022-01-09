@@ -30,6 +30,9 @@ import SymbolicUtils.Code: toexpr
 
 import ArrayInterface
 
+import AbstractAlgebra
+import Polynomials
+
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
@@ -152,5 +155,9 @@ for T in [Num, Complex{Num}]
         @eval (f::$S)(x::$T, y...) = wrap(f(unwrap(x), unwrap.(y)...))
     end
 end
+
+
+###
+include("solve_polynomial.jl")
 
 end # module
