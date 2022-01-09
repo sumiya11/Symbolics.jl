@@ -53,7 +53,8 @@ end
 
 # solve one univariate polynomial equation
 function solve_shape(poly)
-    coeffs   = reverse(collect(AbstractAlgebra.coefficients(poly)))
+    println(poly)
+    coeffs   = reverse(AbstractAlgebra.coefficients_of_univariate(poly))
     unipoly  = Polynomials.Polynomial(coeffs)
     Polynomials.roots(unipoly)
 end
@@ -70,17 +71,16 @@ function solve_shape(system::AbstractArray)
 
     roots  = Vector{Vector{AbstractAlgebra.elem_type(ground)}}(undef, 0)
 
-    for poly in system
-        # select a `poly` from `system`, find its roots,
-        # and for each `root`..
-        for root in solve_shape(poly)
-            vars[1] = ring(root)
-            # ..substiture all other polynomials in system with this `root`..
-            specialized = map(f -> AbstractAlgebra.evaluate(f, vars), system[2:end])
-            # ..and collect solutions of a specialized system
-            for specroots in solve_shape(specialized)
-                push!(roots, [root, specroots...])
-            end
+    poly = first(system)
+    # select a `poly` from `system`, find its roots,
+    # and for each `root`..
+    for root in solve_shape(poly)
+        vars[length(vars) - length(system) + 1] = ring(root)
+        # ..substiture all other polynomials in system with this `root`..
+        specialized = map(f -> AbstractAlgebra.evaluate(f, vars), system[2:end])
+        # ..and collect solutions of a specialized system
+        for specroots in solve_shape(specialized)
+            push!(roots, [root, specroots...])
         end
     end
 
@@ -93,7 +93,7 @@ end
 
 # for now, already in shape position
 system = [
-        x^2 - 1,
+        x - 1,
         x*y + 1,
         x*z*y - 2
 ]
